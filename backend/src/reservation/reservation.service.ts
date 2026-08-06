@@ -305,7 +305,7 @@ export class ReservationService {
       )
       .join('\n');
 
-    return header + rows;
+    return header + (rows ? rows + '\n' : '');
   }
 
   private getWeekStart(weekStart?: string): Date {
