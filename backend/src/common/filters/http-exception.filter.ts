@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 
 @Catch()
@@ -13,6 +14,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
+    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+      exception = this.mapPrismaError(exception);
+    }
 
     const status =
       exception instanceof HttpException
@@ -37,5 +42,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
       path: request.url,
       message,
     });
+  }
+
+  private mapPrismaError(error: Prisma.PrismaClientKnownRequestError) {
+    if (error.code === 'P2002') {
+      return new HttpException('Registro duplicado.', HttpStatus.CONFLICT);
+    }
+
+    if (error.code === 'P2025') {
+      return new HttpException(
+        'Registro não encontrado.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return error;
   }
 }

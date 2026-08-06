@@ -1,8 +1,10 @@
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import cookieParser from 'cookie-parser';
 import { AppModule } from '@/app.module';
 import { PrismaService } from '@/prisma/prisma.service';
+import { HttpExceptionFilter } from '@/common/filters/http-exception.filter';
 
 let app: INestApplication;
 let prismaService: PrismaService;
@@ -13,6 +15,9 @@ beforeAll(async () => {
   }).compile();
 
   app = moduleRef.createNestApplication();
+  // Espelha a configuração do main.ts (cookie parsing + filtro global de exceções)
+  app.use(cookieParser());
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

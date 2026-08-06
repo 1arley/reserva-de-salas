@@ -2,7 +2,6 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -151,7 +150,7 @@ export class AuthService {
       expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
     } else if (expiresIn.endsWith('m')) {
       const minutes = parseInt(expiresIn.slice(0, -1));
-      expiresAt = new Date(Date.now() + minutes * 60 * 60 * 1000);
+      expiresAt = new Date(Date.now() + minutes * 60 * 1000);
     } else {
       expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     }
@@ -167,55 +166,22 @@ export class AuthService {
     });
   }
 
-  private async validateRefreshToken(
-    userId: string,
-    token: string,
-  ): Promise<boolean> {
-    const storedToken = await this.prisma.refreshToken.findFirst({
-      where: {
-        userId,
-        expiresAt: {
-          gt: new Date(),
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    if (!storedToken) {
-      throw new UnauthorizedException('Refresh token inválido ou expirado.');
-    }
-
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const isValid = tokenHash === storedToken.token;
-
-    if (!isValid) {
-      throw new UnauthorizedException('Refresh token inválido.');
-    }
-
-    return true;
-  }
-
   private async revokeAllUserRefreshTokens(userId: string): Promise<void> {
     await this.prisma.refreshToken.deleteMany({
       where: { userId },
     });
   }
 
-  async revokeRefreshToken(token: string): Promise<void> {
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const refreshTokens = await this.prisma.refreshToken.findMany();
+  async logout(refreshToken?: string): Promise<void> {
+    if (!refreshToken) return;
 
-    for (const refreshToken of refreshTokens) {
-      if (tokenHash === refreshToken.token) {
-        await this.prisma.refreshToken.delete({
-          where: { id: refreshToken.id },
-        });
-        return;
-      }
-    }
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
 
-    throw new NotFoundException('Refresh token não encontrado.');
+    await this.prisma.refreshToken.deleteMany({
+      where: { token: tokenHash },
+    });
   }
 }

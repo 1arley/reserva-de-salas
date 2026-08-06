@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from '@/auth/auth.controller';
 import { AuthService } from '@/auth/auth.service';
+import { ConfigService } from '@nestjs/config';
 import { RegisterDto } from '@/auth/dto/register.dto';
 import { LoginDto } from '@/auth/dto/login.dto';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
@@ -14,12 +15,27 @@ describe('AuthController', () => {
     register: jest.fn(),
     login: jest.fn(),
     refreshTokens: jest.fn(),
+    logout: jest.fn(),
+  };
+
+  const mockRes = () => {
+    const res: Record<string, jest.Mock> = {
+      cookie: jest.fn(),
+      clearCookie: jest.fn(),
+    };
+    return res;
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [{ provide: AuthService, useValue: mockAuthService }],
+      providers: [
+        { provide: AuthService, useValue: mockAuthService },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue('development') },
+        },
+      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
@@ -103,10 +119,12 @@ describe('AuthController', () => {
 
       mockAuthService.login.mockResolvedValue(mockResponse);
 
-      const result = await controller.login(loginDto);
+      const res = mockRes();
+      const result = await controller.login(loginDto, res as never);
 
       expect(result).toEqual(mockResponse);
       expect(authService.login).toHaveBeenCalledWith(loginDto);
+      expect(res.cookie).toHaveBeenCalled();
     });
 
     it('should propagate UnauthorizedException when credentials are invalid', async () => {
@@ -114,9 +132,9 @@ describe('AuthController', () => {
         new UnauthorizedException('Credenciais inválidas.'),
       );
 
-      await expect(controller.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        controller.login(loginDto, mockRes() as never),
+      ).rejects.toThrow(UnauthorizedException);
       expect(authService.login).toHaveBeenCalledWith(loginDto);
     });
 
@@ -126,9 +144,9 @@ describe('AuthController', () => {
         new UnauthorizedException('Credenciais inválidas.'),
       );
 
-      await expect(controller.login(emptyDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        controller.login(emptyDto, mockRes() as never),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -151,6 +169,7 @@ describe('AuthController', () => {
 
       const result = await controller.refreshTokens(
         mockRequest as unknown as AuthenticatedRequest,
+        mockRes() as never,
       );
 
       expect(result).toEqual(mockResponse);
@@ -165,6 +184,7 @@ describe('AuthController', () => {
       await expect(
         controller.refreshTokens(
           invalidRequest as unknown as AuthenticatedRequest,
+          mockRes() as never,
         ),
       ).rejects.toThrow(TypeError);
     });
@@ -185,6 +205,7 @@ describe('AuthController', () => {
       await expect(
         controller.refreshTokens(
           mockRequest as unknown as AuthenticatedRequest,
+          mockRes() as never,
         ),
       ).rejects.toThrow(UnauthorizedException);
     });
@@ -228,9 +249,9 @@ describe('AuthController', () => {
         new UnauthorizedException('Credenciais inválidas.'),
       );
 
-      await expect(controller.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        controller.login(loginDto, mockRes() as never),
+      ).rejects.toThrow(UnauthorizedException);
       // The error message should be generic, not specific about whether
       // email exists or password is wrong
       expect(authService.login).toHaveBeenCalledWith(loginDto);
