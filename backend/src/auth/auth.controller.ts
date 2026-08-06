@@ -79,9 +79,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const refreshToken =
-      (req.cookies?.[REFRESH_COOKIE] as string | undefined) ??
-      req.get('Authorization')?.replace(/^Bearer\s+/i, '');
+    const refreshToken = req.cookies?.[REFRESH_COOKIE] as string | undefined;
 
     await this.authService.logout(refreshToken);
     clearAuthCookies(res);

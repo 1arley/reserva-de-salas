@@ -38,11 +38,13 @@ export class RoomService {
     }
 
     if (filters.availableFrom && filters.availableTo) {
+      const from = new Date(filters.availableFrom + 'T00:00:00');
+      const to = new Date(filters.availableTo + 'T23:59:59.999');
       where.reservations = {
         none: {
           status: 'CONFIRMED',
-          startTime: { lt: new Date(filters.availableTo) },
-          endTime: { gt: new Date(filters.availableFrom) },
+          startTime: { lt: to },
+          endTime: { gt: from },
         },
       };
     }

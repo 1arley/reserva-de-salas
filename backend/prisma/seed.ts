@@ -22,7 +22,6 @@ async function main() {
     where: { email: 'admin@example.com' },
     update: {},
     create: {
-      id: '1',
       email: 'admin@example.com',
       password: adminPassword,
       name: 'Admin User',
@@ -34,7 +33,6 @@ async function main() {
     where: { email: 'user@example.com' },
     update: {},
     create: {
-      id: '2',
       email: 'user@example.com',
       password: userPassword,
       name: 'Regular User',
