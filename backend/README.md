@@ -33,6 +33,7 @@ Fornecer uma base sólida e padronizada para que qualquer desenvolvedor possa in
 
 Consulte a pasta `docs/` para guias detalhados:
 
+- [API.md](docs/API.md) - Endpoints da aplicação
 - [docker.md](docs/docker.md) - Configuração Docker
 - [authentication.md](docs/authentication.md) - Autenticação JWT
 - [api-documentation.md](docs/api-documentation.md) - Documentação Swagger
