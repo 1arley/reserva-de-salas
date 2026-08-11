@@ -43,7 +43,7 @@ export function setAuthCookies(
   res.cookie(ACCESS_COOKIE, accessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'strict' : 'lax',
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: accessMaxAge,
     path: '/',
   });
@@ -51,7 +51,7 @@ export function setAuthCookies(
   res.cookie(REFRESH_COOKIE, refreshToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'strict' : 'lax',
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: refreshMaxAge,
     path: '/',
   });

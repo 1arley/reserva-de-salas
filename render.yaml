@@ -29,9 +29,9 @@ services:
       - key: JWT_REFRESH_EXPIRES_IN
         value: 7d
       - key: CORS_ORIGIN
-        value: "*"
+        value: https://reserva-de-salas-six.vercel.app,http://localhost:4200
       - key: CORS_CREDENTIALS
-        value: "false"
+        value: "true"
 
 databases:
   - name: reserva-salas-db
