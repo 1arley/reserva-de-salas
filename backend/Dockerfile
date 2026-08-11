@@ -1,7 +1,7 @@
 # Stage 1: Base
 FROM node:22-alpine AS base
 
-RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init wget
 
 WORKDIR /app
 
@@ -39,7 +39,10 @@ COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=build /app/prisma.config.ts ./
+COPY start.sh ./
 COPY package.json ./
+
+RUN chmod +x start.sh && chown -R node:node /app
 
 USER node
 
@@ -49,4 +52,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api || exit 1
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/main.js"]
+CMD ["./start.sh"]
