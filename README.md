@@ -99,7 +99,9 @@ Pré-requisito: Docker + Docker Compose.
 ```bash
 cd backend
 
-# 1. Configuração — os valores padrão de .env.example funcionam com docker compose
+# 1. Configuração (obrigatório) — copie o modelo .env.example e ajuste as variáveis
+#    O arquivo .env é obrigatório; ele é ignorado pelo git (.gitignore) e nunca vai pro repositório.
+#    O .env.example é versionado e serve apenas como exemplo — os valores padrão funcionam com docker compose.
 cp .env.example .env
 
 # 2. Sobe a API + PostgreSQL
@@ -119,7 +121,7 @@ Para parar: `docker compose down`. Para recriar do zero: `docker compose down -v
 
 ## Variáveis de ambiente
 
-Arquivo: `backend/.env` (modelo em `backend/.env.example`).
+Arquivo: `backend/.env` (obrigatório; ignorado pelo git). O modelo `backend/.env.example` fica versionado no repositório como exemplo.
 
 | Variável | Padrão | Descrição |
 |---|---|---|

@@ -87,6 +87,7 @@ export class ReservationService {
           include: RESERVATION_INCLUDE,
         });
       },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
   }
 

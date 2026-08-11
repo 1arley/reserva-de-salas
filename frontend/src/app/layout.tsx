@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Providers } from '@/components/core/providers'
 import './globals.css'
 
 const geistSans = Geist({
@@ -13,14 +14,14 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-    title: 'Nome do App',
-    description: 'Descrição do App',
-    applicationName: 'Nome do App',
+    title: 'Reserva de Salas',
+    description: 'Sistema de reserva de salas de reunião',
+    applicationName: 'Reserva de Salas',
     authors: [{ url: 'https://seedabit.org.br', name: 'Seed a Bit' }],
-    keywords: ['palavra-chave', 'palavra-chave'],
+    keywords: ['salas', 'reservas', 'reunião', 'seed a bit'],
     creator: 'Seed a Bit',
     publisher: 'Seed a Bit',
-    abstract: 'Descrição do App',
+    abstract: 'Sistema de reserva de salas de reunião',
 }
 
 export default function RootLayout({
@@ -41,7 +42,7 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                {children}
+                <Providers>{children}</Providers>
             </body>
         </html>
     )

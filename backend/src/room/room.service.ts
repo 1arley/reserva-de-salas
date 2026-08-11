@@ -38,8 +38,16 @@ export class RoomService {
     }
 
     if (filters.availableFrom && filters.availableTo) {
-      const from = new Date(filters.availableFrom + 'T00:00:00');
-      const to = new Date(filters.availableTo + 'T23:59:59.999');
+      const from = new Date(
+        /^\d{4}-\d{2}-\d{2}$/.test(filters.availableFrom)
+          ? `${filters.availableFrom}T00:00:00`
+          : filters.availableFrom,
+      );
+      const to = new Date(
+        /^\d{4}-\d{2}-\d{2}$/.test(filters.availableTo)
+          ? `${filters.availableTo}T23:59:59.999`
+          : filters.availableTo,
+      );
       where.reservations = {
         none: {
           status: 'CONFIRMED',
