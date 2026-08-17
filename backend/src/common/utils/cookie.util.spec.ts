@@ -60,7 +60,7 @@ describe('cookie.util', () => {
       });
     });
 
-    it('should set secure + strict sameSite when NODE_ENV is production', () => {
+    it('should set secure + none sameSite when NODE_ENV is production (cross-domain)', () => {
       const config = makeConfig({
         NODE_ENV: 'production',
         JWT_ACCESS_EXPIRES_IN: '15m',
@@ -77,12 +77,12 @@ describe('cookie.util', () => {
       expect(res.cookie).toHaveBeenCalledWith(
         ACCESS_COOKIE,
         'access-token',
-        expect.objectContaining({ secure: true, sameSite: 'strict' }),
+        expect.objectContaining({ secure: true, sameSite: 'none' }),
       );
       expect(res.cookie).toHaveBeenCalledWith(
         REFRESH_COOKIE,
         'refresh-token',
-        expect.objectContaining({ secure: true, sameSite: 'strict' }),
+        expect.objectContaining({ secure: true, sameSite: 'none' }),
       );
     });
 
