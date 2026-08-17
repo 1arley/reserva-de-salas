@@ -85,12 +85,11 @@ model Reservation {
 
 model Favorite {
   id        String   @id @default(uuid())
-  userId    String
-  roomId    String
+  userId    String   @unique
+  roomId    String   @unique
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@unique([userId, roomId])
-  @@index([userId])
 }
