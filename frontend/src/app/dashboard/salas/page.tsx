@@ -28,8 +28,9 @@ export default function RoomsPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
+    const [lastUpdate, setLastUpdate] = useState(0)
 
-    const loadRooms = useCallback(async () => {
+    const loadRooms = useCallback(async (signal?: AbortSignal) => {
         setLoading(true)
         setError(null)
         try {
@@ -38,27 +39,35 @@ export default function RoomsPage() {
                 status: status || undefined,
                 page,
                 limit: PAGE_SIZE,
-            })
+            }, signal)
             setRooms(result.data)
             setTotalPages(Math.max(1, result.totalPages))
         } catch (err) {
+            if (err instanceof Error && err.name === 'AbortError') return
             setError(getErrorMessage(err))
         } finally {
             setLoading(false)
         }
-    }, [search, status, page])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [search, status, page, lastUpdate])
 
     useEffect(() => {
-        loadRooms()
+        const controller = new AbortController()
+        loadRooms(controller.signal)
+        return () => controller.abort()
     }, [loadRooms])
 
     useEffect(() => {
         favoritesApi
             .list()
             .then((favs) => setFavoriteIds(new Set(favs.map((r) => r.id))))
-            .catch(() => {
-                // Falha silenciosa: favoritos ficam vazios.
+            .catch((err) => {
+                console.error('Falha ao carregar favoritos:', err)
             })
+    }, [])
+
+    const handleReservationCreated = useCallback(() => {
+        setLastUpdate((prev) => prev + 1)
     }, [])
 
     const hasFilters = search.trim() !== '' || status !== ''
@@ -71,13 +80,14 @@ export default function RoomsPage() {
     function handleSearchSubmit(event: FormEvent) {
         event.preventDefault()
         setPage(1)
-        loadRooms()
+        setLastUpdate((prev) => prev + 1)
     }
 
     function handleClearFilters() {
         setSearch('')
         setStatus('')
         setPage(1)
+        setLastUpdate((prev) => prev + 1)
     }
 
     return (
@@ -178,6 +188,7 @@ export default function RoomsPage() {
                 open={selectedRoom !== null}
                 onClose={() => setSelectedRoom(null)}
                 room={selectedRoom}
+                onSuccess={handleReservationCreated}
             />
         </div>
     )

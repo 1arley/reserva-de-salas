@@ -12,9 +12,10 @@ export const reservationsApi = {
     create: (input: CreateReservationInput): Promise<Reservation> =>
         http.post<Reservation>('/reservations', input),
 
-    list: (filters?: ReservationFilters): Promise<Paginated<Reservation>> =>
+    list: (filters?: ReservationFilters, signal?: AbortSignal): Promise<Paginated<Reservation>> =>
         http.get<Paginated<Reservation>>(
             `/reservations${buildQuery(filters as Record<string, unknown>)}`,
+            signal,
         ),
 
     get: (id: string): Promise<Reservation> =>

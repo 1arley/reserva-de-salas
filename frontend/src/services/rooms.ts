@@ -3,8 +3,8 @@ import type { Paginated } from '@/types/common'
 import type { CreateRoomInput, Room, RoomFilters, UpdateRoomInput } from '@/types/room'
 
 export const roomsApi = {
-    list: (filters?: RoomFilters): Promise<Paginated<Room>> =>
-        http.get<Paginated<Room>>(`/rooms${buildQuery(filters as Record<string, unknown>)}`),
+    list: (filters?: RoomFilters, signal?: AbortSignal): Promise<Paginated<Room>> =>
+        http.get<Paginated<Room>>(`/rooms${buildQuery(filters as Record<string, unknown>)}`, signal),
 
     get: (id: string): Promise<Room> =>
         http.get<Room>(`/rooms/${id}`),

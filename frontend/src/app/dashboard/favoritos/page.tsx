@@ -40,6 +40,11 @@ export default function FavoritesPage() {
         }
     }
 
+    function handleReservationCreated() {
+        setRooms([])
+        void loadFavorites()
+    }
+
     return (
         <div className='space-y-6'>
             <div>
@@ -82,6 +87,7 @@ export default function FavoritesPage() {
                 open={selectedRoom !== null}
                 onClose={() => setSelectedRoom(null)}
                 room={selectedRoom}
+                onSuccess={handleReservationCreated}
             />
         </div>
     )

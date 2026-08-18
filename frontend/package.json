@@ -7,9 +7,9 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "clean-dev": "rmdir /s /q .next && npm run dev",
-        "clean-build": "rmdir /s /q .next && npm run build",
-        "clean-install": "rmdir /s /q node_modules && npm ci",
+    "clean-dev": "rm -rf .next && npm run dev",
+    "clean-build": "rm -rf .next && npm run build",
+    "clean-install": "rm -rf node_modules && npm ci",
         "prepare": "husky"
     },
     "dependencies": {

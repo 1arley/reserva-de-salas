@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 
 @Injectable()
@@ -13,19 +12,23 @@ export class FavoriteService {
       throw new NotFoundException('Sala não encontrada.');
     }
 
-    try {
-      await this.prisma.favorite.create({ data: { userId, roomId } });
-      return { favorited: true };
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        await this.prisma.favorite.deleteMany({ where: { userId, roomId } });
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.favorite.findFirst({
+        where: { userId, roomId },
+      });
+
+      if (existing) {
+        await tx.favorite.delete({
+          where: { userId, roomId },
+        });
         return { favorited: false };
       }
-      throw error;
-    }
+
+      await tx.favorite.create({
+        data: { userId, roomId },
+      });
+      return { favorited: true };
+    });
   }
 
   async findAll(userId: string) {

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { favoritesApi } from '@/services/favorites'
+import { getErrorMessage } from '@/utils/error'
 import { cn } from '@/utils/lib/tailwind-merge'
 import { StarIcon } from '@/components/core/icons'
 
@@ -23,11 +24,17 @@ export function FavoriteButton({
 
     async function handleToggle() {
         if (loading) return
+
         setLoading(true)
         try {
             const { favorited: next } = await favoritesApi.toggle(roomId)
             setFavorited(next)
             onToggle?.(next)
+        } catch (err) {
+            const message = getErrorMessage(err)
+            if (typeof window !== 'undefined') {
+                window.alert(message)
+            }
         } finally {
             setLoading(false)
         }

@@ -18,8 +18,11 @@ const RESERVATION_INCLUDE = {
 
 const MAX_DURATION_MS = 24 * 60 * 60 * 1000;
 
+const CSV_INJECTION_CHARS = /^\s*[=+\-@\t\r]/;
+
 function csvField(value: string): string {
-  const sanitized = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  const str = String(value ?? '');
+  const sanitized = CSV_INJECTION_CHARS.test(str) ? `'${str}` : str;
   return `"${sanitized.replace(/"/g, '""')}"`;
 }
 

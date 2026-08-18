@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 import { reservationsApi } from '@/services/reservations'
 import { getErrorMessage } from '@/utils/error'
 import { toDateTimeLocal } from '@/utils/date'
@@ -18,10 +17,10 @@ interface CreateReservationModalProps {
     open: boolean
     onClose: () => void
     room: Room | null
+    onSuccess?: () => void
 }
 
-export function CreateReservationModal({ open, onClose, room }: CreateReservationModalProps) {
-    const router = useRouter()
+export function CreateReservationModal({ open, onClose, room, onSuccess }: CreateReservationModalProps) {
     const [startTime, setStartTime] = useState('')
     const [endTime, setEndTime] = useState('')
     const [notes, setNotes] = useState('')
@@ -70,8 +69,8 @@ export function CreateReservationModal({ open, onClose, room }: CreateReservatio
                 endTime: new Date(endTime).toISOString(),
                 notes: notes.trim() || undefined,
             })
+            onSuccess?.()
             onClose()
-            router.refresh()
         } catch (err) {
             setError(getErrorMessage(err))
         } finally {
@@ -111,7 +110,7 @@ export function CreateReservationModal({ open, onClose, room }: CreateReservatio
                             id='endTime'
                             type='datetime-local'
                             required
-                            min={minStart}
+                            min={startTime || minStart}
                             value={endTime}
                             onChange={(event) => setEndTime(event.target.value)}
                         />

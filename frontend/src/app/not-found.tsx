@@ -4,6 +4,9 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
+const linkButtonClass =
+    'inline-flex w-60 h-10 items-center justify-center whitespace-nowrap rounded-md bg-blue-700/70 hover:bg-blue-700/85 font-medium'
+
 export default function NotFound() {
     return (
         <div className='w-full h-screen items-center justify-center flex flex-col'>
@@ -29,19 +32,17 @@ export default function NotFound() {
                         <p className='text-wrap max-w-[29rem]'>Desculpe! O conteúdo que você procura pode ter sido removido, mas novas oportunidades sempre brotam. Que tal explorar nosso site e ver o que pode florescer para você?</p>
                     </div>
                     <div className='flex flex-col md:flex-row gap-7 w-full items-center justify-center'>
-                        <button className='w-60 h-10 inline-flex items-center justify-center whitespace-nowrap bg-blue-700/70 hover:bg-blue-700/85 rounded-md font-medium'>
-                            <Link className='w-fit' href="/">Voltar para a página principal</Link>
-                        </button>
-                        <button className='w-60 h-10 inline-flex items-center justify-center whitespace-nowrap bg-blue-700/70 hover:bg-blue-700/85 rounded-md font-medium'>
-                            <Link
-                                className='w-fit'
-                                href="https://seedabit.org.br"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Conhecer a Seed
-                            </Link>
-                        </button>
+                        <Link href="/" className={linkButtonClass}>
+                            Voltar para a página principal
+                        </Link>
+                        <Link
+                            href="https://seedabit.org.br"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={linkButtonClass}
+                        >
+                            Conhecer a Seed
+                        </Link>
                     </div>
                 </div>
             </div>

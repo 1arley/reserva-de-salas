@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FavoriteService } from '@/favorite/favorite.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
-import { Prisma, RoomStatus } from '@prisma/client';
+import { RoomStatus } from '@prisma/client';
 
 describe('FavoriteService', () => {
   let service: FavoriteService;
@@ -13,10 +13,12 @@ describe('FavoriteService', () => {
       findUnique: jest.fn(),
     },
     favorite: {
+      findFirst: jest.fn(),
       create: jest.fn(),
-      deleteMany: jest.fn(),
+      delete: jest.fn(),
       findMany: jest.fn(),
     },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -46,15 +48,22 @@ describe('FavoriteService', () => {
     updatedAt: new Date('2026-01-01T00:00:00Z'),
   };
 
-  const p2002Error = () =>
-    new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
-      code: 'P2002',
-      clientVersion: '7.7.0',
-    });
-
   describe('toggle', () => {
-    it('should create a favorite and return favorited true', async () => {
+    it('should create a favorite and return favorited true when not already favorited', async () => {
       mockPrismaService.room.findUnique.mockResolvedValue(baseRoom);
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: any) => Promise<unknown>) => {
+          const tx = {
+            favorite: {
+              findFirst: mockPrismaService.favorite.findFirst,
+              create: mockPrismaService.favorite.create,
+              delete: mockPrismaService.favorite.delete,
+            },
+          };
+          return cb(tx);
+        },
+      );
+      mockPrismaService.favorite.findFirst.mockResolvedValue(null);
       mockPrismaService.favorite.create.mockResolvedValue({
         id: 'fav-1',
         userId: 'user-1',
@@ -65,6 +74,9 @@ describe('FavoriteService', () => {
 
       expect(prisma.room.findUnique).toHaveBeenCalledWith({
         where: { id: 'room-1' },
+      });
+      expect(prisma.favorite.findFirst).toHaveBeenCalledWith({
+        where: { userId: 'user-1', roomId: 'room-1' },
       });
       expect(prisma.favorite.create).toHaveBeenCalledWith({
         data: { userId: 'user-1', roomId: 'room-1' },
@@ -84,25 +96,44 @@ describe('FavoriteService', () => {
       expect(prisma.favorite.create).not.toHaveBeenCalled();
     });
 
-    it('should delete the favorite on P2002 race and return favorited false', async () => {
+    it('should delete the favorite when already favorited and return favorited false', async () => {
       mockPrismaService.room.findUnique.mockResolvedValue(baseRoom);
-      mockPrismaService.favorite.create.mockRejectedValue(p2002Error());
-      mockPrismaService.favorite.deleteMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.$transaction.mockImplementation(
+        async (cb: (tx: any) => Promise<unknown>) => {
+          const tx = {
+            favorite: {
+              findFirst: mockPrismaService.favorite.findFirst,
+              create: mockPrismaService.favorite.create,
+              delete: mockPrismaService.favorite.delete,
+            },
+          };
+          return cb(tx);
+        },
+      );
+      mockPrismaService.favorite.findFirst.mockResolvedValue({
+        id: 'fav-1',
+        userId: 'user-1',
+        roomId: 'room-1',
+      });
+      mockPrismaService.favorite.delete.mockResolvedValue({
+        id: 'fav-1',
+        userId: 'user-1',
+        roomId: 'room-1',
+      });
 
       const result = await service.toggle('user-1', 'room-1');
 
-      expect(prisma.favorite.deleteMany).toHaveBeenCalledWith({
+      expect(prisma.favorite.delete).toHaveBeenCalledWith({
         where: { userId: 'user-1', roomId: 'room-1' },
       });
       expect(result).toEqual({ favorited: false });
     });
 
-    it('should rethrow non-P2002 errors', async () => {
+    it('should rethrow errors from the transaction', async () => {
       mockPrismaService.room.findUnique.mockResolvedValue(baseRoom);
-      mockPrismaService.favorite.create.mockRejectedValue(new Error('boom'));
+      mockPrismaService.$transaction.mockRejectedValue(new Error('boom'));
 
       await expect(service.toggle('user-1', 'room-1')).rejects.toThrow('boom');
-      expect(prisma.favorite.deleteMany).not.toHaveBeenCalled();
     });
   });
 

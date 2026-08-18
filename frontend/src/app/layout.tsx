@@ -30,7 +30,7 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang='pt-BR'>
+        <html lang='pt-BR' className='h-full'>
             <head>
                 <link rel="preload" href="/images/seed-a-mascot.svg" as="image" />
                 <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96" />
@@ -40,7 +40,7 @@ export default function RootLayout({
                 <link rel="manifest" href="/icons/site.webmanifest" />
             </head>
             <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+                className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
             >
                 <Providers>{children}</Providers>
             </body>
