@@ -112,7 +112,7 @@ Encerra a sessão. **Auth:** pública — lê o refresh token do cookie `refresh
 
 ### `GET /api/user`
 
-Lista usuários. **Auth:** JWT.
+Lista usuários (paginado). **Auth:** `ADMIN` / `SUPERADMIN`.
 
 **Query params:**
 
@@ -131,6 +131,29 @@ Lista usuários. **Auth:** JWT.
   "meta": { "total": 2, "page": 1, "limit": 10, "totalPages": 1 }
 }
 ```
+
+**Erros:** `401`, `403` (usuário comum).
+
+### `POST /api/user`
+
+Cria usuário com role definida. **Auth:** `ADMIN` / `SUPERADMIN` — permite ao administrador criar contas (inclusive outros admins) via API, sem depender do seed.
+
+**Body (`CreateUserDto`):**
+
+| Campo | Tipo | Obrigatório | Validação | Exemplo |
+|---|---|---|---|---|
+| `name` | string | sim | não vazio | `"João Silva"` |
+| `email` | string | sim | email válido | `"joao@seedabit.com"` |
+| `password` | string | sim | mínimo 8 caracteres, com letras e números | `"Senha@123"` |
+| `role` | enum `USER` / `ADMIN` / `SUPERADMIN` | não | role válida | `ADMIN` (padrão `USER`) |
+
+**Resposta `201`** (sem o campo `password`):
+
+```json
+{ "id": "uuid", "email": "joao@seedabit.com", "name": "João Silva", "role": "ADMIN", "createdAt": "...", "updatedAt": "..." }
+```
+
+**Erros:** `400` (validação), `401`, `403` (usuário comum), `409` (email já cadastrado).
 
 ### `GET /api/user/me`
 

@@ -8,7 +8,7 @@
 
 Implementação completa do backend do Sistema Web de Reserva de Salas sobre o scaffold NestJS existente. A PR adiciona o domínio de salas (`Room`), reservas (`Reservation`) e favoritos (`Favorite`) com Prisma + PostgreSQL, autenticação JWT via cookies `httpOnly` (com fallback para Bearer header), autorização por papéis (`USER` / `ADMIN` / `SUPERADMIN`), validações de negócio (conflito de horário, duração máxima, regras de status) e cobertura de testes unitários + e2e.
 
-Frontend (Next.js) permanece como scaffold — integração é o próximo passo (ver [Próximos passos](#próximos-passos)).
+Frontend (Next.js) integrado e consumindo a API — ver [Status do frontend](#status-do-frontend).
 
 ## O que está incluído
 
@@ -45,6 +45,11 @@ Frontend (Next.js) permanece como scaffold — integração é o próximo passo 
 - `POST /api/favorites/:roomId` — toggle atômico (criação + catch de `P2002` para remover).
 - `GET /api/favorites` — lista as salas favoritas do usuário.
 
+### Módulo de usuários (`src/user/`)
+
+- `GET /api/user` — listagem paginada de usuários, restrita a `ADMIN`/`SUPERADMIN` via `RolesGuard`.
+- `POST /api/user` — criação de usuário com role definida (`USER`/`ADMIN`/`SUPERADMIN`), restrita a `ADMIN`/`SUPERADMIN`; permite criar administradores via API sem depender do seed.
+
 ### Infra comum
 
 - `HttpExceptionFilter` — mapeia Prisma `P2002` → `409 Conflict` e `P2025` → `404 Not Found`; formato de erro padronizado `{ statusCode, timestamp, path, message }`.
@@ -60,7 +65,8 @@ Prefixo global: `/api` (configurável via `API_PREFIX`).
 | `POST` | `/api/auth/login` | Login (define cookies + retorna tokens) | Pública |
 | `POST` | `/api/auth/refresh` | Renova tokens (cookies/Bearer) | Refresh guard |
 | `POST` | `/api/auth/logout` | Revoga refresh token e limpa cookies | Pública (lê cookie/Bearer) |
-| `GET` | `/api/user` | Lista usuários (paginado) | JWT |
+| `GET` | `/api/user` | Lista usuários (paginado) | ADMIN / SUPERADMIN |
+| `POST` | `/api/user` | Cria usuário com role (admin) | ADMIN / SUPERADMIN |
 | `GET` | `/api/user/me` | Perfil do usuário logado | JWT |
 | `GET` | `/api/rooms` | Lista salas com filtros | JWT |
 | `GET` | `/api/rooms/:id` | Detalhe de sala | JWT |
@@ -132,9 +138,17 @@ Contas de teste criadas pelo seed:
 | ADMIN | `admin@example.com` | `Admin123!` |
 | USER | `user@example.com` | `User123!` |
 
+## Status do frontend
+
+O frontend (Next.js) está integrado à API com `credentials: 'include'` e cobre as telas do desafio:
+
+- **Autenticação** — login, registro e `AuthContext` (sessão + `isAdmin`).
+- **Colaborador** — salas (busca/filtros/paginação), criação de reservas em modal, minhas reservas com cancelamento e exportação CSV, agenda semanal, favoritos, histórico.
+- **Administrador** — gerenciamento de salas (CRUD via modal), dashboard de estatísticas; rotas protegidas por `isAdmin` no cliente e `RolesGuard` no servidor.
+- **Deploy** — `Dockerfile` (standalone) + `docker-compose.yml`.
+
 ## Próximos passos
 
-1. **Integração frontend (Next.js)** — consumir a API com `credentials: 'include'` para autenticação via cookies; `CORS_ORIGIN` já configurado para `http://localhost:3000`/`4200` com `CORS_CREDENTIALS=true`.
-2. Telas: login/registro, listagem de salas com filtros, criação/cancelamento de reservas, calendário semanal, histórico, favoritos.
-3. Painel administrativo: CRUD de salas, estatísticas e listagem geral de reservas.
-4. Fluxo de refresh automático do token no cliente (interceptador de respostas `401`).
+1. Fluxo de refresh automático do token no cliente (interceptador de respostas `401`).
+2. Redefinição de senha e perfil do usuário.
+3. Restringir double-booking do mesmo usuário em salas diferentes no mesmo horário.

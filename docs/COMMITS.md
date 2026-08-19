@@ -107,6 +107,47 @@ Full reservation flow plus the favorites module.
 
 ---
 
+## 5. `feat(user): admin-only user management`
+
+```text
+feat(user): admin-only user management
+
+Restrict user listing to administrators and add an admin-only
+endpoint to create users with a defined role.
+
+- GET /api/user: now requires ADMIN/SUPERADMIN via RolesGuard
+  (previously any authenticated user could list all users,
+  leaking names and emails)
+- POST /api/user: creates a user with role (USER/ADMIN/SUPERADMIN),
+  reusing CreateUserDto + UserService.create; allows provisioning
+  administrators via API instead of relying only on the seed
+```
+
+**Por quê:** a listagem de usuários expunha dados sensíveis a qualquer usuário autenticado, divergindo da documentação Swagger que já anunciava "Apenas ADMIN". O novo endpoint fecha a lacuna de provisionamento de administradores sem depender de acesso ao seed.
+
+---
+
+## 6. `feat(frontend): add admin room management and reservation history`
+
+```text
+feat(frontend): add admin room management and reservation history
+
+Complete the admin-facing and history screens of the Next.js SPA.
+
+- /dashboard/gerenciar-salas: admin CRUD of rooms via RoomFormModal
+  (create/edit/delete, status filter, search, pagination)
+- /dashboard/historico-reservas: past/cancelled reservations with
+  working cancel action and CSV export
+- Wire "Gerenciar Salas" into the sidebar and dashboard admin card
+- Add frontend/Dockerfile (standalone build) + docker-compose.yml
+  for containerized deployment; enable output: 'standalone' in
+  next.config.ts
+```
+
+**Por quê:** as páginas de administração e histórico completam os requisitos obrigatórios do desafio (painel administrativo, histórico) e o Dockerfile habilita o deploy do site — considerado no conjunto da avaliação.
+
+---
+
 ## Opcional — commit de documentação
 
 Se a PR incluir a documentação gerada nesta entrega:

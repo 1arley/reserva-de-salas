@@ -24,7 +24,7 @@ reserva-de-salas/
 │   │   └── seed.ts               # Salas e usuários de teste
 │   ├── src/
 │   │   ├── auth/                 # Login, registro, refresh, logout, guards JWT
-│   │   ├── user/                 # Perfil e listagem de usuários
+│   │   ├── user/                 # Perfil, listagem e criação de usuários (admin)
 │   │   ├── room/                 # CRUD de salas + filtros de disponibilidade
 │   │   ├── reservation/          # Ciclo de vida das reservas, agenda, histórico, CSV, stats
 │   │   ├── favorite/             # Toggle de salas favoritas
@@ -32,8 +32,14 @@ reserva-de-salas/
 │   ├── test/                     # Suites e2e (rooms, reservations, auth)
 │   ├── docker-compose.yml        # API + PostgreSQL (+ pgAdmin via profile)
 │   └── .env.example              # Modelo de variáveis de ambiente
-├── frontend/
-│   └── nextjs-react-typescript/  # SPA Next.js (scaffold — integração em andamento)
+├── frontend/                     # SPA Next.js (integrada à API)
+│   └── src/
+│       ├── app/                  # Rotas: login, registro, dashboard (salas, reservas, agenda, favoritos, estatísticas, gerenciar-salas, histórico)
+│       ├── components/           # UI (button, card, modal...) e domínio (salas, reservas)
+│       ├── context/              # AuthContext (sessão, isAdmin)
+│       ├── services/             # Clientes HTTP da API (auth, rooms, reservations, favorites)
+│       ├── types/                # Tipos do domínio
+│       └── utils/                # Helpers (datas, erros)
 └── docs/                         # Documentação da entrega
     ├── API.md                    # Referência completa dos endpoints
     ├── PR_BACKEND_API.md         # Proposta de PR (backend)
@@ -47,6 +53,17 @@ reserva-de-salas/
 - **Reservas** — criação com validação de conflito de horário (transação `Serializable`, sem double-booking), cancelamento, agenda semanal, histórico, exportação CSV e estatísticas.
 - **Favoritos** — toggle atômico de salas favoritas por usuário.
 - **Tratamento de erros** — formato padronizado `{ statusCode, timestamp, path, message }`; erros Prisma mapeados (`P2002` → `409`, `P2025` → `404`).
+
+## Funcionalidades do frontend
+
+- **Autenticação** — login e registro consumindo a API com `credentials: 'include'`; sessão gerenciada via `AuthContext` com `isAdmin`.
+- **Salas** — listagem com busca, filtro de capacidade/status e paginação.
+- **Reservas** — criação em modal com validação de horário (mínimo futuro, fim > início, máx. 24h), listagem com cancelamento e exportação CSV.
+- **Agenda** — calendário semanal das reservas.
+- **Favoritos** — página de salas favoritas com toggle.
+- **Painel administrativo** — gerenciamento de salas (CRUD via modal) e dashboard de estatísticas, acessíveis apenas a `ADMIN`/`SUPERADMIN`.
+- **Histórico** — reservas passadas/canceladas com cancelamento de futuras e exportação CSV.
+- **Deploy** — `Dockerfile` (standalone) + `docker-compose.yml` para conteinerização.
 
 ## Autenticação por cookies
 
@@ -73,7 +90,8 @@ Prefixo global: `/api`. Referência completa em [docs/API.md](./docs/API.md).
 | `POST` | `/api/auth/login` | Login (define cookies) | Pública |
 | `POST` | `/api/auth/refresh` | Renova tokens | Refresh token |
 | `POST` | `/api/auth/logout` | Logout (revoga refresh + limpa cookies) | Pública |
-| `GET` | `/api/user` | Lista usuários | JWT |
+| `GET` | `/api/user` | Lista usuários (paginado) | ADMIN / SUPERADMIN |
+| `POST` | `/api/user` | Cria usuário com role (admin) | ADMIN / SUPERADMIN |
 | `GET` | `/api/user/me` | Perfil do usuário logado | JWT |
 | `GET` | `/api/rooms` | Lista salas (filtros + paginação) | JWT |
 | `GET` | `/api/rooms/:id` | Detalhe de sala | JWT |
@@ -186,4 +204,5 @@ npm run test:all
 ## Status do projeto
 
 - ✅ Backend: API completa (auth, salas, reservas, favoritos, stats, CSV) com testes unitários e e2e
-- 🚧 Frontend: scaffold Next.js criado; integração com a API em andamento
+- ✅ Frontend: SPA Next.js integrada à API (login/registro, salas, reservas, agenda, favoritos, estatísticas, gerenciar-salas, histórico)
+- ✅ Deploy: backend configurado para Render; frontend com `Dockerfile` (standalone) + `docker-compose.yml`
