@@ -1,0 +1,14 @@
+name: seedabit-frontend
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: frontend-web
+    restart: unless-stopped
+    ports:
+      - '4200:4200'
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_PREFIX=/api

@@ -50,14 +50,21 @@ export default function DashboardPage() {
                 <div className='flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800'>
                     <ChartIcon className='h-5 w-5 shrink-0' />
                     <p>
-                        Você está logado como administrador. Acesse as{' '}
+                        Você está logado como administrador. Acesse o{' '}
+                        <Link
+                            href='/dashboard/gerenciar-salas'
+                            className='font-medium underline'
+                        >
+                            painel de gerenciamento de salas
+                        </Link>{' '}
+                        e as{' '}
                         <Link
                             href='/dashboard/estatisticas'
                             className='font-medium underline'
                         >
                             estatísticas
-                        </Link>{' '}
-                        e o painel de gerenciamento de salas.
+                        </Link>
+                        .
                     </p>
                 </div>
             )}

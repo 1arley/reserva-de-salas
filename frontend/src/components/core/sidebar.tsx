@@ -26,6 +26,12 @@ const NAV_ITEMS: NavItem[] = [
     { href: '/dashboard/reservas', label: 'Minhas Reservas', icon: CalendarIcon },
     { href: '/dashboard/agenda', label: 'Agenda Semanal', icon: CalendarIcon },
     { href: '/dashboard/favoritos', label: 'Favoritos', icon: StarIcon },
+    {
+        href: '/dashboard/gerenciar-salas',
+        label: 'Gerenciar Salas',
+        icon: RoomsIcon,
+        adminOnly: true,
+    },
     { href: '/dashboard/estatisticas', label: 'Estatísticas', icon: ChartIcon, adminOnly: true },
 ]
 
