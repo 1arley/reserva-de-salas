@@ -1,6 +1,8 @@
 import {
+  Body,
   Controller,
   Get,
+  Post,
   UseGuards,
   Req,
   Query,
@@ -10,8 +12,11 @@ import {
 import { ApiTags, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { UserService } from '@/user/user.service';
 import { ApiGetUserMe } from '@/user/swagger/user.get.me.swagger';
+import { ApiCreateUser } from '@/user/swagger/user.post.create.swagger';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
+import { Roles } from '@/auth/roles.decorators';
 import { ApiFindAllUsers } from '@/user/swagger/user.get.findAll.swagger';
+import { CreateUserDto } from '@/dto/create-user.dto';
 import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
@@ -27,12 +32,20 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
+  @Roles('ADMIN', 'SUPERADMIN')
   @ApiFindAllUsers()
   findAll(@Query('page') page: string, @Query('limit') limit: string) {
     const pageNumber = parsePageParam(page, DEFAULT_PAGE);
     const limitNumber = parsePageParam(limit, DEFAULT_PAGE_SIZE);
 
     return this.userService.findAll(pageNumber, limitNumber);
+  }
+
+  @Post()
+  @Roles('ADMIN', 'SUPERADMIN')
+  @ApiCreateUser()
+  create(@Body() dto: CreateUserDto) {
+    return this.userService.create(dto);
   }
 
   @Get('me')
